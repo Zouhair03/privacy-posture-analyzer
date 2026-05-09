@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Posture Analyzer — APK Privacy Audit</title>
+  <meta name="description" content="Analysez la posture privacy de vos APKs Android — permissions, trackers, stockage sensible et score global." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<!-- ═══ HEADER ════════════════════════════════════════════════════════════ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">🔒</span>
+      <span class="logo-text">Privacy<span class="accent">Posture</span></span>
+      <span class="logo-badge">Analyzer</span>
+    </div>
+    <div class="header-meta">
+      <span class="version-tag">v1.0 Web</span>
+      <span class="masvs-tag">MASVS 1,2,11,12</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ HERO / UPLOAD ═════════════════════════════════════════════════════ -->
+<main id="app">
+  <section class="hero" id="upload-section">
+    <div class="hero-bg"></div>
+    <div class="container">
+      <h1 class="hero-title">Audit Privacy <span class="gradient-text">APK Android</span></h1>
+      <p class="hero-subtitle">Analysez les permissions, détectez les trackers et évaluez les risques de stockage en quelques secondes.</p>
+
+      <!-- Upload Card -->
+      <div class="upload-card glass" id="upload-card">
+        <div class="drop-zone" id="drop-zone">
+          <div class="drop-icon">📦</div>
+          <p class="drop-title">Déposez votre fichier <code>.apk</code> ici</p>
+          <p class="drop-sub">ou cliquez pour sélectionner</p>
+          <input type="file" id="apk-input" accept=".apk" hidden />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="profile-select">Profil de l'application</label>
+            <select id="profile-select">
+              <option value="OTHER">🌐 Général</option>
+              <option value="HEALTH">🏥 Santé</option>
+              <option value="EDUCATION">📚 Éducation</option>
+              <option value="FINANCE">💳 Finance</option>
+              <option value="COMMERCE">🛍️ Commerce</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="api-key-input">Clé Gemini (optionnel)</label>
+            <input type="password" id="api-key-input" placeholder="AIza... (analyse IA avancée)" />
+          </div>
+        </div>
+
+        <div class="selected-file hidden" id="selected-file">
+          <span class="file-icon">📱</span>
+          <span class="file-name" id="file-name-display"></span>
+          <span class="file-size" id="file-size-display"></span>
+        </div>
+
+        <button class="btn-analyze" id="analyze-btn" disabled>
+          <span class="btn-icon">🔍</span>
+          <span>Analyser l'APK</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PROGRESS ════════════════════════════════════════════════════════ -->
+  <section class="progress-section hidden" id="progress-section">
+    <div class="container">
+      <div class="progress-card glass">
+        <div class="progress-header">
+          <div class="pulse-ring"></div>
+          <h2>Analyse en cours…</h2>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="progress-log" id="progress-log"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ RESULTS ══════════════════════════════════════════════════════════ -->
+  <section class="results-section hidden" id="results-section">
+    <div class="container">
+
+      <!-- AI Summary -->
+      <div id="ai-summary-box" class="hidden glass" style="margin-bottom: 24px; border: 1px solid #10b981; border-left: 4px solid #10b981;">
+        <h3 style="margin: 0 0 8px 0; color: #10b981; font-size: 1.1rem; padding: 16px 16px 0 16px;">✨ Résumé IA Gemini</h3>
+        <p id="ai-summary-text" style="color: var(--text-1); font-size: 0.95rem; line-height: 1.5; margin: 0; padding: 0 16px 16px 16px;"></p>
+      </div>
+
+      <!-- Score Header -->
+      <div class="score-header glass">
+        <div class="score-left">
+          <p class="score-label">Score Privacy Global</p>
+          <div class="app-info">
+            <span class="app-name" id="result-package"></span>
+            <span class="app-version" id="result-version"></span>
+            <span class="app-profile-badge" id="result-profile"></span>
+          </div>
+          <div class="score-gauge-wrap">
+            <svg class="score-gauge" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+              <path class="gauge-track" d="M20,110 A90,90 0 0,1 180,110" fill="none" stroke="#1e2235" stroke-width="16" stroke-linecap="round"/>
+              <path class="gauge-fill" id="gauge-fill" d="M20,110 A90,90 0 0,1 180,110" fill="none" stroke="#10b981" stroke-width="16" stroke-linecap="round"
+                    stroke-dasharray="283" stroke-dashoffset="283"/>
+              <text x="100" y="98" text-anchor="middle" class="gauge-number" id="gauge-number">0</text>
+              <text x="100" y="115" text-anchor="middle" class="gauge-level" id="gauge-level">—</text>
+            </svg>
+          </div>
+        </div>
+        <div class="score-right">
+          <div class="sub-scores">
+            <div class="sub-score-item">
+              <div class="sub-score-bar-wrap">
+                <div class="sub-score-label">Permissions <span class="sub-weight">40%</span></div>
+                <div class="sub-score-track"><div class="sub-score-fill perms-fill" id="perms-fill"></div></div>
+              </div>
+              <span class="sub-score-value" id="perms-value">–</span>
+            </div>
+            <div class="sub-score-item">
+              <div class="sub-score-bar-wrap">
+                <div class="sub-score-label">Trackers <span class="sub-weight">35%</span></div>
+                <div class="sub-score-track"><div class="sub-score-fill trackers-fill" id="trackers-fill"></div></div>
+              </div>
+              <span class="sub-score-value" id="trackers-value">–</span>
+            </div>
+            <div class="sub-score-item">
+              <div class="sub-score-bar-wrap">
+                <div class="sub-score-label">Stockage <span class="sub-weight">25%</span></div>
+                <div class="sub-score-track"><div class="sub-score-fill storage-fill" id="storage-fill"></div></div>
+              </div>
+              <span class="sub-score-value" id="storage-value">–</span>
+            </div>
+          </div>
+          <div class="stat-grid" id="stat-grid"></div>
+        </div>
+      </div>
+
+      <!-- Export Buttons -->
+      <div class="export-bar">
+        <button class="btn-export" id="export-json">⬇ JSON</button>
+        <button class="btn-export" id="export-html">⬇ Rapport HTML</button>
+        <button class="btn-export btn-new" id="new-analysis">🔄 Nouvelle analyse</button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="permissions">🔐 Permissions <span class="tab-count" id="tc-perms">0</span></button>
+        <button class="tab-btn" data-tab="trackers">📡 Trackers <span class="tab-count" id="tc-trackers">0</span></button>
+        <button class="tab-btn" data-tab="storage">💾 Stockage <span class="tab-count" id="tc-storage">0</span></button>
+        <button class="tab-btn" data-tab="recommendations">💡 Recommandations <span class="tab-count" id="tc-recs">0</span></button>
+        <button class="tab-btn" data-tab="checklist">✅ Checklist</button>
+      </div>
+
+      <!-- Tab: Permissions -->
+      <div class="tab-panel active" id="tab-permissions">
+        <div class="panel-glass glass">
+          <table class="data-table" id="perms-table">
+            <thead>
+              <tr>
+                <th>Permission</th>
+                <th>Classification</th>
+                <th>Justification</th>
+                <th>Remédiation</th>
+              </tr>
+            </thead>
+            <tbody id="perms-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Trackers -->
+      <div class="tab-panel hidden" id="tab-trackers">
+        <div class="panel-glass glass" id="trackers-panel"></div>
+      </div>
+
+      <!-- Tab: Storage -->
+      <div class="tab-panel hidden" id="tab-storage">
+        <div class="panel-glass glass">
+          <table class="data-table" id="storage-table">
+            <thead>
+              <tr><th>Localisation</th><th>Pattern</th><th>Risque</th><th>Remédiation</th></tr>
+            </thead>
+            <tbody id="storage-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Recommendations -->
+      <div class="tab-panel hidden" id="tab-recommendations">
+        <div class="recs-list" id="recs-list"></div>
+      </div>
+
+      <!-- Tab: Checklist -->
+      <div class="tab-panel hidden" id="tab-checklist">
+        <div class="panel-glass glass" id="checklist-panel"></div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════════════ -->
+  <!-- ═══ CHAT WIDGET ════════════════════════════════════════════════════════ -->
+  <div id="chat-widget" class="hidden">
+    <button id="chat-toggle-btn" class="chat-toggle-btn">
+      <span class="chat-icon">🤖</span>
+      <span class="chat-label">Demander à l'expert</span>
+    </button>
+    
+    <div id="chat-window" class="chat-window glass hidden">
+      <div class="chat-header">
+        <span class="chat-header-title">✨ Gemini Privacy Expert</span>
+        <button id="chat-close-btn" class="chat-close-btn">✖</button>
+      </div>
+      <div id="chat-messages" class="chat-messages">
+        <div class="chat-msg ai-msg">Bonjour ! Je suis l'assistant IA. Posez-moi des questions sur le rapport de cette application !</div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Demandez pourquoi ce score..." />
+        <button id="chat-send-btn">Envoyer</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+  <p>Privacy Posture Analyzer — Projet Académique | Architecture MASVS chap. 1,2,11,12</p>
+</footer>
+
+<script src="/js/main.js"></script>
+</body>
+</html>

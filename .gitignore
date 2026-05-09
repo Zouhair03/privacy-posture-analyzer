@@ -1,0 +1,13 @@
+node_modules/
+.env
+*.log
+.DS_Store
+
+# Exclude reports and PDFs as requested
+*.pdf
+*.tex
+*.docx
+rapport_projet.tex
+test_apks/
+scratch/
+pdf_content.txt
